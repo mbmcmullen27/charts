@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    {{- include "tiny-git.labels" . | nindent 4 }}
+  name: {{ include "tiny-git.fullname" . }}
+spec:
+  serviceAccountName: {{ include "tiny-git.serviceAccountName" . }}
+  securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+  containers:
+  - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+    imagePullPolicy: {{ .Values.image.pullPolicy }}
+    name: {{ .Chart.Name }}
+    volumeMounts:
+      - name: authorized-keys
+        mountPath: /home/git/.ssh
+      - name: srv-git
+        mountPath: /srv/git
+  volumes:
+  - name: authorized-keys
+    persistentVolumeClaim:
+      claimName: {{ .Release.Name }}-authorized-keys
+  - name: srv-git
+    persistentVolumeClaim:
+      claimName: {{ .Release.Name }}-srv
+  {{- with .Values.nodeSelector }}
+  nodeSelector:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+  {{- with .Values.affinity }}
+  affinity:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+  {{- with .Values.tolerations }}
+  tolerations:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}

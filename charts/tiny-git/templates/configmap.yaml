@@ -1,0 +1,9 @@
+{{- if .Values.nginxConfigMap.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-nginx-tcp
+  namespace: {{ .Values.nginxConfigMap.namesapce }}
+data:
+  "{{ .Values.service.port }}": {{ .Release.Namespace }}/{{ include "tiny-git.fullname" . }}:{{ .Values.service.port }}
+{{- end }}
